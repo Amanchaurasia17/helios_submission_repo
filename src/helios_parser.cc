@@ -197,6 +197,7 @@ ErrorCode Parser::parse(const uint8_t* data, size_t len) {
     // Reset all state
     pool_.reset();
     string_table_.reset();
+    resolved_ref_cache_.clear();
     string_table_loaded_ = false;
     pos_          = 0;
     depth_        = 0;
@@ -742,6 +743,11 @@ Node* Parser::resolve_reference(uint32_t ref_index) {
         return nullptr;
     }
 
+    auto cache_it = resolved_ref_cache_.find(ref_index);
+    if (cache_it != resolved_ref_cache_.end()) {
+        return cache_it->second;
+    }
+
     // Walk the reference chain to resolve chained references
     uint32_t target_idx = ref_index;
     for (int hops = 0; hops < kMaxReferenceChain; ++hops) {
@@ -850,6 +856,7 @@ Node* Parser::resolve_reference(uint32_t ref_index) {
         memcpy(&cnode->value, &safe_target->value, sizeof(cnode->value));
     }
 
+    resolved_ref_cache_[ref_index] = cnode;
     return cnode;
 }
 

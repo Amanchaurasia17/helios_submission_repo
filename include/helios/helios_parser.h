@@ -7,6 +7,7 @@
 #include <cstdint>
 #include <cstddef>
 #include <cstdarg>
+#include <map>
 
 namespace helios {
 
@@ -59,6 +60,7 @@ private:
     bool           string_table_loaded_;
     ErrorCode      error_code_;
     char           error_msg_[512];
+    std::map<uint32_t, Node*> resolved_ref_cache_;
 };
 
 }  // namespace helios
