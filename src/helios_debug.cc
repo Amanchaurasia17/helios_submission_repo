@@ -359,7 +359,7 @@ std::string DocumentInspector::generate_report(const StringTable& string_table) 
     
     if (string_table.is_loaded()) {
         ss << "--- String Table Statistics ---\n"
-           << "Loaded string entries: " << string_table.count() << "\n";
+           << "String Table: Loaded\n";
     } else {
         ss << "String Table: Not loaded/None\n";
     }
