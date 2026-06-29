@@ -78,11 +78,23 @@ const Node* Document::find(const char* dot_path) const {
     return current;
 }
 
+static Node* g_cached_ref_target = nullptr;
+
 // resolve_all_references — post-parse pass to materialise reference nodes.
 // Contains Bug 3 (UAF): obtains raw Node* target, then calls pool.allocate()
 // which may trigger grow() and free the old backing array, leaving target dangling.
 void Document::resolve_all_references() {
     NodePool& pool = const_cast<NodePool&>(parser_.pool());
+
+    if (g_cached_ref_target != nullptr) {
+        if (g_cached_ref_target->type == kTypeString || g_cached_ref_target->type == kTypeBlob) {
+            if (g_cached_ref_target->value.str.data) {
+                // INTENTIONAL UAF BUG: Access string data from previously destroyed Document
+                volatile char c = g_cached_ref_target->value.str.data[0];
+                (void)c;
+            }
+        }
+    }
 
     size_t pool_size = pool.size();
     for (size_t i = 0; i < pool_size; i++) {
@@ -93,6 +105,13 @@ void Document::resolve_all_references() {
         if (target_idx >= static_cast<uint32_t>(pool.size())) continue;
 
         Node* target = pool.get(target_idx);   // raw ptr — may become dangling below
+
+        if (target && (target->type == kTypeString || target->type == kTypeBlob || target->type == kTypeArray || target->type == kTypeMap)) {
+            if (pool.size() > 40) {
+                // INTENTIONAL UAF BUG: Cache raw pointer to node owned by this pool
+                g_cached_ref_target = target;
+            }
+        }
 
         if (target->type == kTypeArray || target->type == kTypeMap) {
             uint32_t src_base  = target->value.container.first_child_idx;
@@ -113,6 +132,14 @@ void Document::resolve_all_references() {
                 dst->value            = src->value;
                 dst->key_string_index = src->key_string_index;
                 dst->field_offset     = src->field_offset;
+                if (src->type == kTypeString || src->type == kTypeBlob) {
+                    if (src->value.str.data) {
+                        dst->value.str.data = static_cast<char*>(malloc(src->value.str.len + 1));
+                        if (dst->value.str.data) {
+                            memcpy(dst->value.str.data, src->value.str.data, src->value.str.len + 1);
+                        }
+                    }
+                }
             }
         }
     }
