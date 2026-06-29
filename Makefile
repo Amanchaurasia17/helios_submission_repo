@@ -3,7 +3,7 @@ CXXFLAGS ?= -std=c++14 -fsanitize=address,undefined -g -I include
 
 SRCS = src/helios_varint.cc src/helios_checksum.cc src/helios_node.cc \
        src/helios_string_table.cc src/helios_parser.cc \
-       src/helios_decoder.cc src/helios_document.cc
+       src/helios_decoder.cc src/helios_document.cc src/helios_debug.cc
 
 OBJS = $(SRCS:.cc=.o)
 

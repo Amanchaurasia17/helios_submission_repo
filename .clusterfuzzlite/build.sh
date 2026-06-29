@@ -9,8 +9,9 @@ $CXX $CXXFLAGS -std=c++14 -c $IFLAGS $SRC/src/helios_string_table.cc -o string_t
 $CXX $CXXFLAGS -std=c++14 -c $IFLAGS $SRC/src/helios_parser.cc      -o parser.o
 $CXX $CXXFLAGS -std=c++14 -c $IFLAGS $SRC/src/helios_decoder.cc     -o decoder.o
 $CXX $CXXFLAGS -std=c++14 -c $IFLAGS $SRC/src/helios_document.cc    -o document.o
+$CXX $CXXFLAGS -std=c++14 -c $IFLAGS $SRC/src/helios_debug.cc       -o debug.o
 
-LIB_OBJS="varint.o checksum.o node.o string_table.o parser.o decoder.o document.o"
+LIB_OBJS="varint.o checksum.o node.o string_table.o parser.o decoder.o document.o debug.o"
 
 $CXX $CXXFLAGS -std=c++14 $LIB_FUZZING_ENGINE \
     $IFLAGS $SRC/fuzz/parser_fuzzer.cc $LIB_OBJS \
