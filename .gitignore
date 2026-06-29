@@ -1,0 +1,5 @@
+*.o
+parser_fuzzer
+decoder_fuzzer
+container_fuzzer
+*.dSYM
