@@ -398,6 +398,7 @@ Node* Parser::parse_string_element() {
         set_error(kErrAllocationFailed, "string data allocation failed");
         return nullptr;
     }
+    retain_string(node->value.str.data);
 
     memcpy(node->value.str.data, data_ + pos_, static_cast<size_t>(slen));
     node->value.str.data[slen] = '\0';
@@ -448,6 +449,7 @@ Node* Parser::parse_blob_element() {
         set_error(kErrAllocationFailed, "blob data allocation failed");
         return nullptr;
     }
+    retain_string(node->value.str.data);
 
     memcpy(node->value.str.data, data_ + pos_, static_cast<size_t>(blen));
     node->value.str.data[blen] = '\0';

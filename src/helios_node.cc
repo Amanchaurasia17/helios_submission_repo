@@ -1,10 +1,33 @@
-// src/helios_node.cc
-#include <cstdlib>
-#include <cstring>
+#include <map>
+#include <mutex>
 #include "helios/helios_node.h"
 #include "helios/helios_types.h"
 
+static std::map<void*, int> g_string_ref_counts;
+static std::mutex g_ref_mutex;
+
 namespace helios {
+
+void retain_string(void* data) {
+    if (!data) return;
+    std::lock_guard<std::mutex> lock(g_ref_mutex);
+    g_string_ref_counts[data]++;
+}
+
+void release_string(void* data) {
+    if (!data) return;
+    std::lock_guard<std::mutex> lock(g_ref_mutex);
+    auto it = g_string_ref_counts.find(data);
+    if (it != g_string_ref_counts.end()) {
+        it->second--;
+        if (it->second <= 0) {
+            free(data);
+            g_string_ref_counts.erase(it);
+        }
+    } else {
+        free(data);
+    }
+}
 
 NodePool::NodePool()
     : nodes_(static_cast<Node*>(calloc(kInitialNodePoolCap, sizeof(Node)))),
@@ -14,7 +37,7 @@ NodePool::NodePool()
 NodePool::~NodePool() {
     for (size_t i = 0; i < size_; ++i) {
         if (nodes_[i].type == kTypeString || nodes_[i].type == kTypeBlob) {
-            free(nodes_[i].value.str.data);
+            release_string(nodes_[i].value.str.data);
         }
     }
     free(nodes_);
@@ -56,7 +79,7 @@ size_t NodePool::capacity() const {
 void NodePool::reset() {
     for (size_t i = 0; i < size_; ++i) {
         if (nodes_[i].type == kTypeString || nodes_[i].type == kTypeBlob) {
-            free(nodes_[i].value.str.data);
+            release_string(nodes_[i].value.str.data);
         }
     }
     size_ = 0;

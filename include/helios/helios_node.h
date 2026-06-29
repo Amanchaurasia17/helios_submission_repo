@@ -8,6 +8,9 @@
 
 namespace helios {
 
+void retain_string(void* data);
+void release_string(void* data);
+
 // Node holds one parsed FBF element.
 // The value union is discriminated by the `type` field.
 // `key_string_index` is the string-table index of this node's map key,

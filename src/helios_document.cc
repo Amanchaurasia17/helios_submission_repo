@@ -132,14 +132,6 @@ void Document::resolve_all_references() {
                 dst->value            = src->value;
                 dst->key_string_index = src->key_string_index;
                 dst->field_offset     = src->field_offset;
-                if (src->type == kTypeString || src->type == kTypeBlob) {
-                    if (src->value.str.data) {
-                        dst->value.str.data = static_cast<char*>(malloc(src->value.str.len + 1));
-                        if (dst->value.str.data) {
-                            memcpy(dst->value.str.data, src->value.str.data, src->value.str.len + 1);
-                        }
-                    }
-                }
             }
         }
     }
