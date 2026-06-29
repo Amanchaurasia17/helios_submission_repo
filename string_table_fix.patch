@@ -1,0 +1,13 @@
+diff --git a/src/helios_string_table.cc b/src/helios_string_table.cc
+index afaab8c..4c362a0 100644
+--- a/src/helios_string_table.cc
++++ b/src/helios_string_table.cc
+@@ -47,7 +47,7 @@ bool StringTable::load(const uint8_t* data, size_t data_len) {
+         if (i + 1 < entry_count_)
+             total_data += slen + 1;   // correct for all-but-last
+         else
+-            total_data += slen;        // BUG: off-by-one on last entry (no NUL byte counted)
++            total_data += (size_t)slen + 1;        // BUG: off-by-one on last entry (no NUL byte counted)
+ 
+         scan_pos += slen;
+     }

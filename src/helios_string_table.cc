@@ -43,11 +43,7 @@ bool StringTable::load(const uint8_t* data, size_t data_len) {
         scan_pos += c;
         if (scan_pos + slen > data_len) { delete[] entries_; entries_ = nullptr; entry_count_ = 0; return false; }
 
-        // INTENTIONAL BUG: last entry omits +1 for NUL terminator
-        if (i + 1 < entry_count_)
-            total_data += slen + 1;   // correct for all-but-last
-        else
-            total_data += slen;        // BUG: off-by-one on last entry (no NUL byte counted)
+        total_data += slen + 1;
 
         scan_pos += slen;
     }

@@ -12,6 +12,11 @@ NodePool::NodePool()
       capacity_(kInitialNodePoolCap) {}
 
 NodePool::~NodePool() {
+    for (size_t i = 0; i < size_; ++i) {
+        if (nodes_[i].type == kTypeString || nodes_[i].type == kTypeBlob) {
+            free(nodes_[i].value.str.data);
+        }
+    }
     free(nodes_);
 }
 
@@ -49,6 +54,11 @@ size_t NodePool::capacity() const {
 }
 
 void NodePool::reset() {
+    for (size_t i = 0; i < size_; ++i) {
+        if (nodes_[i].type == kTypeString || nodes_[i].type == kTypeBlob) {
+            free(nodes_[i].value.str.data);
+        }
+    }
     size_ = 0;
     memset(nodes_, 0, capacity_ * sizeof(Node));
 }
