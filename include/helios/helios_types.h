@@ -19,7 +19,7 @@ static const int    kMaxReferenceChain    = 16;
 static const size_t kMaxStringLength      = 1u << 20;
 static const size_t kMaxElementCount      = 1u << 20;
 static const size_t kMaxDecompressedSize  = 1u << 24;
-static const size_t kInitialNodePoolCap   = 24;
+static const size_t kInitialNodePoolCap   = 3;
 
 // ---- Element type tags ----------------------------------------------------
 enum ElementType : uint8_t {

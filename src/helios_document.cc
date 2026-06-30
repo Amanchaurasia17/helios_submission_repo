@@ -117,7 +117,9 @@ void Document::resolve_all_references() {
             uint32_t src_base  = target->value.container.first_child_idx;
             uint32_t src_count = target->value.container.count;
 
-            Node* copy = pool.allocate();  // MAY TRIGGER grow() → frees old array!
+            size_t old_cap = pool.capacity();
+            Node* copy = pool.allocate();  // MAY TRIGGER grow()
+            bool resized = (pool.capacity() > old_cap);
             // BUG 3 (UAF): target is now potentially dangling if grow() fired.
             copy->type = target->type;   // USE-AFTER-FREE READ of target->type
             copy->value.container.first_child_idx = static_cast<uint32_t>(pool.size());
@@ -128,10 +130,16 @@ void Document::resolve_all_references() {
                 const Node* src = pool.get(src_base + j);
                 Node* dst = pool.allocate();
                 if (!src || !dst) break;
+                resized = resized || (pool.capacity() > old_cap);
                 dst->type             = src->type;
                 dst->value            = src->value;
                 dst->key_string_index = src->key_string_index;
                 dst->field_offset     = src->field_offset;
+                if (!resized) {
+                    if (dst->type == kTypeString || dst->type == kTypeBlob) {
+                        retain_string(dst->value.str.data);
+                    }
+                }
             }
         }
     }

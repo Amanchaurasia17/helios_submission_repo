@@ -794,12 +794,14 @@ Node* Parser::resolve_reference(uint32_t ref_index) {
     }
 
     // Allocate the copy node (may invalidate all existing Node* pointers)
+    size_t old_cap = pool_.capacity();
     Node* copy_node = pool_.allocate();
     if (!copy_node) {
         set_error(kErrAllocationFailed, "reference copy node allocation failed");
         return nullptr;
     }
     size_t copy_idx = pool_.size() - 1;
+    bool resized = (pool_.capacity() > old_cap);
 
     // Re-acquire by index and fill in the copy using saved locals
     Node* cnode = pool_.get(copy_idx);
@@ -830,6 +832,7 @@ Node* Parser::resolve_reference(uint32_t ref_index) {
                           "reference child copy allocation failed");
                 return nullptr;
             }
+            resized = resized || (pool_.capacity() > old_cap);
             size_t child_copy_idx = pool_.size() - 1;
             Node* cc = pool_.get(child_copy_idx);
             cc->type             = child_type;
@@ -837,6 +840,11 @@ Node* Parser::resolve_reference(uint32_t ref_index) {
             cc->field_offset     = child_field_off;
             // Copy value union from the saved tmp (handles all scalar value types)
             memcpy(&cc->value, &tmp_child.value, sizeof(cc->value));
+            if (!resized) {
+                if (child_type == kTypeString || child_type == kTypeBlob) {
+                    retain_string(cc->value.str.data);
+                }
+            }
         }
 
         // Re-acquire copy node again (children grew pool)
@@ -854,6 +862,11 @@ Node* Parser::resolve_reference(uint32_t ref_index) {
         // Re-acquire target safely (pool may have moved)
         const Node* safe_target = pool_.get(target_idx);
         memcpy(&cnode->value, &safe_target->value, sizeof(cnode->value));
+        if (!resized) {
+            if (tgt_type == kTypeString || tgt_type == kTypeBlob) {
+                retain_string(cnode->value.str.data);
+            }
+        }
     }
 
     resolved_ref_cache_[ref_index] = cnode;
