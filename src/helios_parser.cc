@@ -990,6 +990,7 @@ Node* Parser::parse_compressed_element() {
     Node tmp_sub;
     memcpy(&tmp_sub, sub_root, sizeof(Node));
 
+    size_t old_cap = pool_.capacity();
     Node* wrap_node = pool_.allocate();
     if (!wrap_node) {
         set_error(kErrAllocationFailed, "compressed result node allocation failed");
@@ -1000,7 +1001,14 @@ Node* Parser::parse_compressed_element() {
     wnode->type             = sub_type;
     wnode->key_string_index = sub_key;
     wnode->field_offset     = sub_field_off;
+    
+    bool resized = (pool_.capacity() > old_cap);
     memcpy(&wnode->value, &tmp_sub.value, sizeof(wnode->value));
+    if (!resized) {
+        if (sub_type == kTypeString || sub_type == kTypeBlob) {
+            retain_string(wnode->value.str.data);
+        }
+    }
 
     return wnode;
 }
