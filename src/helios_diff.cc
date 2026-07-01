@@ -1,5 +1,5 @@
 
-#include "helios_diff.h"
+#include "helios/helios_diff.h"
 
 #include <algorithm>
 #include <cassert>

@@ -9,10 +9,11 @@ $CXX $CXXFLAGS -std=c++14 -c $IFLAGS $SRC/src/helios_string_table.cc -o string_t
 $CXX $CXXFLAGS -std=c++14 -c $IFLAGS $SRC/src/helios_parser.cc      -o parser.o
 $CXX $CXXFLAGS -std=c++14 -c $IFLAGS $SRC/src/helios_decoder.cc     -o decoder.o
 $CXX $CXXFLAGS -std=c++14 -c $IFLAGS $SRC/src/helios_document.cc    -o document.o
+$CXX $CXXFLAGS -std=c++14 -c $IFLAGS $SRC/src/helios_diff.cc        -o diff.o
 $CXX $CXXFLAGS -std=c++14 -c $IFLAGS $SRC/src/helios_debug.cc       -o debug.o
 $CXX $CXXFLAGS -std=c++14 -c $IFLAGS $SRC/src/helios_chartables.cc  -o chartables.o
 
-LIB_OBJS="varint.o checksum.o node.o string_table.o parser.o decoder.o document.o debug.o chartables.o"
+LIB_OBJS="varint.o checksum.o node.o string_table.o parser.o decoder.o document.o diff.o debug.o chartables.o"
 
 $CXX $CXXFLAGS -std=c++14 $LIB_FUZZING_ENGINE \
     $IFLAGS $SRC/fuzz/parser_fuzzer.cc $LIB_OBJS \
@@ -26,6 +27,10 @@ $CXX $CXXFLAGS -std=c++14 $LIB_FUZZING_ENGINE \
     $IFLAGS $SRC/fuzz/container_fuzzer.cc $LIB_OBJS \
     -o $OUT/container_fuzzer
 
+$CXX $CXXFLAGS -std=c++14 $LIB_FUZZING_ENGINE \
+    $IFLAGS $SRC/fuzz/diff_fuzzer.cc $LIB_OBJS \
+    -o $OUT/diff_fuzzer
+
 if [ -d "$SRC/fuzz/corpus/parser_fuzzer" ]; then
     zip -j $OUT/parser_fuzzer_seed_corpus.zip \
         $SRC/fuzz/corpus/parser_fuzzer/*
@@ -37,4 +42,8 @@ fi
 if [ -d "$SRC/fuzz/corpus/container_fuzzer" ]; then
     zip -j $OUT/container_fuzzer_seed_corpus.zip \
         $SRC/fuzz/corpus/container_fuzzer/*
+fi
+if [ -d "$SRC/fuzz/corpus/diff_fuzzer" ]; then
+    zip -j $OUT/diff_fuzzer_seed_corpus.zip \
+        $SRC/fuzz/corpus/diff_fuzzer/*
 fi

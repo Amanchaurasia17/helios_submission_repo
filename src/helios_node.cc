@@ -1,3 +1,5 @@
+#include <cstdlib>
+#include <cstring>
 #include <map>
 #include <mutex>
 #include "helios/helios_node.h"

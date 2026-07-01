@@ -11,6 +11,7 @@
 #include "helios_parser.h"
 #include "helios_decoder.h"
 #include "helios_document.h"
+#include "helios_diff.h"
 #include "helios_debug.h"
 
 #endif  // HELIOS_H_

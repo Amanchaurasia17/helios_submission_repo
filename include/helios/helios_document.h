@@ -25,6 +25,8 @@ public:
     const Node* root() const;
     size_t node_count() const;
 
+    const char* key_name(const Node* node) const;
+
     // dot-path lookup: walks map nodes matching string-table keys split by '.'
     // Returns nullptr if any segment is not found.
     const Node* find(const char* dot_path) const;

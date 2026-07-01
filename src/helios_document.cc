@@ -33,6 +33,14 @@ const NodePool& Document::parser_pool() const {
     return parser_.pool();
 }
 
+const char* Document::key_name(const Node* node) const {
+    if (!node || node->key_string_index == 0xFFFFFFFF) return nullptr;
+
+    size_t len = 0;
+    const char* key = parser_.string_table().get_string(node->key_string_index, &len);
+    return key;
+}
+
 // dot-path find: split on '.', walk map nodes matching string-table key strings
 const Node* Document::find(const char* dot_path) const {
     if (!dot_path || !valid_) return nullptr;
